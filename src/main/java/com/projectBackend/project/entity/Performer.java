@@ -18,7 +18,7 @@ public class Performer {
     private Long performerId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "performance_id", nullable = false) // 외래키
-    private String performanceId;
+    private Performance performanceId;
     private String performers;
 
 

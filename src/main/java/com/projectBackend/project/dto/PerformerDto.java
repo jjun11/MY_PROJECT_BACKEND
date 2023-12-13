@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PerformerDto {
-    private Long performaerId;
+    private Long performerId;
     private String performanceId;
     private String performers;
 

@@ -28,10 +28,19 @@ public class PerformerService {
 
     }
 
+    // 공연자 등록
+//    public boolean savePerformer(PerformerDto performerDto) {
+//        try {
+//            Performer performer = new Performer();
+//        }
+//        return true;
+//    }
+
+
     private PerformerDto convertEntityToDto(Performer performer) {
         PerformerDto performerDto = new PerformerDto();
         performerDto.setPerformerId(performer.getPerformerId());
-        performerDto.setPerformanceId(performer.getPerformanceId());
+        performerDto.setPerformanceId(performer.getPerformanceId().getPerformanceId().toString());
         performerDto.setPerformers(performer.getPerformers());
         return performerDto;
     }
