@@ -56,7 +56,7 @@ public class PerformanceService {
             if (isTrue) {
                 Performer performer = new Performer();
                 performer.setPerformance(performance);
-                performer.setMember(getMemberDto.)
+                performer.setMember(getMemberDto.);
                 performerRepository.save(performer);
             } else {
                 return false;
