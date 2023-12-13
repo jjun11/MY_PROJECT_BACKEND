@@ -40,8 +40,8 @@ public class PerformerService {
     private PerformerDto convertEntityToDto(Performer performer) {
         PerformerDto performerDto = new PerformerDto();
         performerDto.setPerformerId(performer.getPerformerId());
-        performerDto.setPerformanceId(performer.getPerformanceId().getPerformanceId().toString());
-        performerDto.setPerformers(performer.getPerformers());
+        performerDto.setPerformanceId(performer.getPerformance().getPerformanceId().toString());
+        performerDto.setUserNickname(performer.getMember().getUserNickname());
         return performerDto;
     }
 }
