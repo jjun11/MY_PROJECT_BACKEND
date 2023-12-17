@@ -1,6 +1,7 @@
 package com.projectBackend.project.dto;
 
 
+import com.projectBackend.project.entity.Member;
 import com.projectBackend.project.entity.Music;
 import lombok.*;
 
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 public class MusicDTO {
+    private Long id;
 
     private String musicTitle;
     private String userNickname;
@@ -25,8 +27,10 @@ public class MusicDTO {
     private String promoImage;
     private String musicInfo;
 
+
     // 생성자, 게터, 세터 등은 생략
 
+    //MUSIC -> MUSICDTO
     public static MusicDTO of(Music music) {
         return MusicDTO.builder()
                 .musicTitle(music.getMusicTitle())
@@ -42,4 +46,25 @@ public class MusicDTO {
                 .musicInfo(music.getMusicInfo())
                 .build();
     }
+
+    // MUSICDTO => MUSICENTITY
+    public Music toEntity(Member member) {
+        return Music.builder()
+                .musicTitle(musicTitle)
+                .lyricist(lyricist)
+                .composer(composer)
+                .genre(genre)
+                .purchaseCount(purchaseCount)
+                .lyrics(lyrics)
+                .releaseDate(releaseDate) // LocalDate을 직접 사용합니다.
+                .thumbnailImage(thumbnailImage)
+                .promoImage(promoImage)
+                .musicInfo(musicInfo)
+                .member(member) // Member 객체를 이용하여 userNickname을 설정합니다.
+                .build();
+    }
+
+
+
 }
+
