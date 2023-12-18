@@ -151,7 +151,6 @@ public class AuthService {
         }
     }
 
-
     // 카카오 로그인 이후 랜덤 패스워드 생성
     public String generateRandomPassword() {
         UUID uuid = UUID.randomUUID();
@@ -184,6 +183,8 @@ public class AuthService {
         log.warn("닉네임 중복 확인 {} : ", isTrue);
         return isTrue;
     }
+
+
     // 길종환
     public UserResDto getUserInfo(String token) {
         String email = tokenProvider.getUserEmail(token);
@@ -202,9 +203,4 @@ public class AuthService {
 
         return userEntity.orElse(null);
     }
-
-
-
-
-
 }

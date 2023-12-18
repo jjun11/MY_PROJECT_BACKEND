@@ -1,6 +1,5 @@
 package com.projectBackend.project.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,7 +23,7 @@ public class Comment {
     private Long commentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "user_id")
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -43,10 +42,11 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     private Comment parentComment;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY)
     private List<Comment> childComments = new ArrayList<>();
 
+    @Column(name = "ip_address")
+    private String ipAddress;
     private String email;
     private String nickName;
     private String password;

@@ -3,7 +3,6 @@ package com.projectBackend.project.jwt;
 
 
 import com.projectBackend.project.dto.TokenDto;
-import com.projectBackend.project.entity.Token;
 import com.projectBackend.project.repository.TokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -24,7 +23,6 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -176,7 +174,7 @@ public class TokenProvider {
         }
         return false;
     }
-
+    
     // refresh 토큰의 유효성 검사
     public boolean validateRefreshToken(String refreshToken) {
         try {
