@@ -3,7 +3,6 @@ package com.projectBackend.project.controller;
 
 import com.projectBackend.project.dto.PerformanceDto;
 import com.projectBackend.project.dto.UserResDto;
-import com.projectBackend.project.entity.Member;
 import com.projectBackend.project.service.AuthService;
 import com.projectBackend.project.service.PerformanceService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 //import static com.projectBackend.project.utils.Common.CORS_ORIGIN;
-
 
 
 @Slf4j
