@@ -4,9 +4,12 @@ package com.projectBackend.project.controller;
 import com.projectBackend.project.dto.MusicDTO;
 import com.projectBackend.project.dto.MusicUserDto;
 import com.projectBackend.project.dto.UserReqDto;
+import com.projectBackend.project.entity.Member;
+import com.projectBackend.project.entity.Music;
 import com.projectBackend.project.service.MusicService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -124,5 +127,16 @@ public class MusicController {
         MusicDTO musicDTO = new MusicDTO();
         // MusicUserDto를 MusicDTO로 변환하는 로직 작성
         return musicDTO;
+    }
+    // 길종환
+    // 맴버가 가지고 있는 음원 가져오기
+    @GetMapping("/user/{userId}/music")
+    public ResponseEntity<List<MusicUserDto>> getUserMusic(@PathVariable Long userId) {
+        List<MusicUserDto> list = musicService.getMusicByUserId(userId);
+        if (list != null && !list.isEmpty()) {
+            return ResponseEntity.ok(list);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
