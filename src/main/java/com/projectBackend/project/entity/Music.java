@@ -6,6 +6,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.Date;
 
 @Entity
 @Table(name = "music")
@@ -44,8 +45,7 @@ public class Music {
     @Column(name = "thumbnail_img")
     private String thumbnailImage;
 
-    @Column(name = "promo_img")
-    private String promoImage;
+
 
     @Column(name = "music_info")
     private String musicInfo;

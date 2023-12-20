@@ -1,16 +1,18 @@
 package com.projectBackend.project.service;
 
 
-import com.projectBackend.project.dto.TokenDto;
 import com.projectBackend.project.dto.UserReqDto;
 import com.projectBackend.project.dto.UserResDto;
+import com.projectBackend.project.dto.TokenDto;
 import com.projectBackend.project.entity.Member;
+import com.projectBackend.project.entity.Music;
 import com.projectBackend.project.entity.Token;
 import com.projectBackend.project.jwt.TokenProvider;
 import com.projectBackend.project.repository.TokenRepository;
 import com.projectBackend.project.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -18,10 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -101,14 +100,14 @@ public class AuthService {
                     // 가장 최근의 리프레쉬 데이터
                     if (!tokens.isEmpty()) {
                         Token token = tokens.get(tokens.size() - 1);
-                            log.info("token : {}", token);
-                            // 불러온 리프레쉬 토큰
-                            String refreshToken = token.getRefreshToken();
-                            log.info("refreshToken : {}", refreshToken);
-                            // 토큰 유효성 체크
-                            return tokenProvider.validateRefreshToken(refreshToken);
-                        } else {
-                            return false;
+                        log.info("token : {}", token);
+                        // 불러온 리프레쉬 토큰
+                        String refreshToken = token.getRefreshToken();
+                        log.info("refreshToken : {}", refreshToken);
+                        // 토큰 유효성 체크
+                        return tokenProvider.validateRefreshToken(refreshToken);
+                    } else {
+                        return false;
                     }
                 } else {
                     System.out.println("해당 회원 정보가 없습니다.");
@@ -135,19 +134,50 @@ public class AuthService {
 
     // 카카오 로그인 => 카카오 토큰이 존재하지만, 사용하지 않을 생각
     public TokenDto kakaoLogin(String email) {
-        if (email != null) {
-            // 랜덤 비밀번호 생성
-            String password = generateRandomPassword();
-            UserReqDto userReqDto = new UserReqDto();
-            userReqDto.setUserEmail(email);
-            userReqDto.setUserPassword(password);
-            UsernamePasswordAuthenticationToken authenticationToken = userReqDto.toAuthentication();
-            log.info("승인 토큰 : {}", authenticationToken);
-            Authentication authentication = managerBuilder.getObject().authenticate(authenticationToken);
-            log.info("승인 정보 : {}", authentication);
-            return tokenProvider.generateTokenDto(authentication);
+        try {
+            // 카카오 로그인 => 카카오 이메일 + 랜덤 비밀번호 사용
+            // 랜덤 비밀번호를 저장하기 위한 데이터 조회 및 저장
+            Optional<Member> member = userRepository.findByUserEmail(email);
+            if (member.isPresent()) {
+                Member user = member.get();
+                System.out.println("카카오 로그인 회원 : " + user);
+
+                // 랜덤 비밀번호 생성 및 저장
+                String password = generateRandomPassword();
+                // 비밀번호 해싱
+                String hashedPassword = passwordEncoder.encode(password);
+                user.setUserPassword(hashedPassword);
+                userRepository.save(user);
+                // 응답 dto
+                UserReqDto userReqDto = new UserReqDto();
+                userReqDto.setUserEmail(email);
+                userReqDto.setUserPassword(password);
+                UsernamePasswordAuthenticationToken authenticationToken = userReqDto.toAuthentication();
+                log.info("승인 토큰 : {}", authenticationToken);
+                Authentication authentication = managerBuilder.getObject().authenticate(authenticationToken);
+                log.info("승인 정보 : {}", authentication);
+                TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
+                // 카카오 토큰 저장
+                if (tokenDto != null) {
+                    // 토큰 저장
+                    Token token = new Token();
+                    String refreshToken = tokenDto.getRefreshToken();
+                    System.out.println("카카오 리프레쉬 토큰 : " + refreshToken);
+                    token.setRefreshToken(refreshToken);
+                    token.setMember(user);
+                    tokenRepository.save(token);
+                    return tokenDto;
+                }
+                else {
+                    return null;
+                }
+            }
+            else {
+                return null;
+            }
         }
-        else {
+        catch (Exception e){
+            e.printStackTrace();
             return null;
         }
     }
