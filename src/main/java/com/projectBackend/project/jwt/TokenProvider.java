@@ -3,6 +3,7 @@ package com.projectBackend.project.jwt;
 
 
 import com.projectBackend.project.dto.TokenDto;
+import com.projectBackend.project.entity.Token;
 import com.projectBackend.project.repository.TokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -23,6 +24,7 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -38,7 +40,6 @@ public class TokenProvider {
     private TokenRepository tokenRepository;
 
 
-    //
     public TokenProvider(@Value("${jwt.secret}") String secretKey) {
         this.key = Keys.secretKeyFor(SignatureAlgorithm.HS512); // HS512 알고리즘을 사용하는 키 생성
     }
@@ -89,6 +90,7 @@ public class TokenProvider {
 
     // 새로운 accessToken
     public String generateNewAccessToken(String Token) {
+        System.out.println("start creating new access");
         // refresh 토큰을 파싱하여 클레임을 얻습니다.
         Claims refreshTokenClaims = parseClaims(Token);
         // refresh 토큰이 유효한지 확인합니다.
@@ -130,7 +132,7 @@ public class TokenProvider {
     }
 
     // 토큰 복호화
-    private Claims parseClaims(String accessToken) {
+    public Claims parseClaims(String accessToken) {
         try {
             return io.jsonwebtoken.Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
         } catch (ExpiredJwtException e) {
@@ -174,7 +176,7 @@ public class TokenProvider {
         }
         return false;
     }
-    
+
     // refresh 토큰의 유효성 검사
     public boolean validateRefreshToken(String refreshToken) {
         try {
@@ -225,18 +227,22 @@ public class TokenProvider {
         return generateTokenDto(authentication).getAccessToken();
     }
 
-    // 길종환
+    // 길종환 (수정 조영준)
     public String getUserEmail(String token) {
-        // 토큰을 파싱하여 클레임을 얻습니다.
-        Claims claims = io.jsonwebtoken.Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        // 클레임에서 이메일을 읽어옵니다.
-        String email = claims.get("email", String.class);
-
-        return email;
+        try {
+            Claims claims = io.jsonwebtoken.Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            // 'sub' 키에 해당하는 값을 추출
+            String email = (String) claims.get("sub");
+            System.out.println(email);
+            return email;
+        } catch (ExpiredJwtException e) {
+            // 토큰이 만료된 경우 예외 처리
+            // 이 부분은 필요에 따라 처리하십시오.
+            return null;
+        }
     }
 }

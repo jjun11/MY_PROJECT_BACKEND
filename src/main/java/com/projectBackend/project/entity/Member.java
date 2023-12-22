@@ -25,20 +25,23 @@ public class Member {
     private String userNickname;
     private String userName;
     private String userAddr;
+    private String userDetailAddr;
     private String userPhone;
     private String userGen;
     private int userAge;
     private int userPoint;
+    private String profileImg;
     private String BUSINESS_NUM;
     @Enumerated(EnumType.STRING)
     private Authority authority;
 
     @Builder
-    public Member(String email, String password, String nickName, String name, String addr, String tel, String gender, String BUSINESS_NUM, int point, int age, Authority authority) {
+    public Member(String email, String password, String nickName, String name, String addr, String userDetailAddr, String tel, String gender, String BUSINESS_NUM, int point, int age, Authority authority) {
         this.userEmail = email;
         this.userPassword = password;
         this.userNickname = nickName;
         this.userAddr = addr;
+        this.userDetailAddr = userDetailAddr;
         this.userPhone = tel;
         this.BUSINESS_NUM = BUSINESS_NUM;
         this.userName = name;

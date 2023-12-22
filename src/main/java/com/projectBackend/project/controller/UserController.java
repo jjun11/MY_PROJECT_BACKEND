@@ -7,10 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -24,8 +21,8 @@ public class UserController {
 
     // 로그인 상태 체크 (+ refresh 토큰 유효성 체크)
     @GetMapping("/isLogin")
-    public ResponseEntity<Boolean> isLogin(@RequestParam String email) {
-        boolean isTrue = authService.isLogined(email);
+    public ResponseEntity<Boolean> isLogin(@RequestParam String accessToken) {
+        boolean isTrue = authService.isLogined(accessToken);
         System.out.println("로그인 체크 : " + isTrue);
         return ResponseEntity.ok(isTrue);
     }
