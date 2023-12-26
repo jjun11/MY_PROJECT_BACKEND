@@ -1,6 +1,7 @@
 package com.projectBackend.project.service;
 
 
+import com.projectBackend.project.constant.Authority;
 import com.projectBackend.project.dto.UserReqDto;
 import com.projectBackend.project.dto.UserResDto;
 import com.projectBackend.project.dto.TokenDto;
@@ -69,7 +70,6 @@ public class AuthService {
                 // 토큰 저장
                 Token token = new Token();
                 token.setRefreshToken(refreshToken);
-//                token.setEmail(email);
                 token.setMember(user);
                 tokenRepository.save(token);
                 return tokenDto;
@@ -109,7 +109,6 @@ public class AuthService {
                         // 불러온 리프레쉬 토큰
                         String refreshToken = token.getRefreshToken();
                         log.info("refreshToken : {}", refreshToken);
-                        // 토큰 유효성 체크
                         return tokenProvider.validateRefreshToken(refreshToken);
                     } else {
                         return false;
@@ -130,10 +129,51 @@ public class AuthService {
         }
     }
 
-    // accessToken 재발급
-    public String createAccessToken(String refreshToken) {
-        Authentication authentication = tokenProvider.getAuthentication(refreshToken);
-        return tokenProvider.generateAccessToken(authentication);
+    // 관리자 로그인
+    public TokenDto admin (UserReqDto userReqDto) {
+        String email = userReqDto.getUserEmail();
+        Optional<Member> userEntity = userRepository.findByUserEmail(email);
+
+        if (email.equals("adminlogin123@admin.com")) {
+            if (userEntity.isPresent()) {
+                // userEntity 객체의 정보를 데이터 베이스 객체로 생성
+                Member user = userEntity.get();
+                UsernamePasswordAuthenticationToken authenticationToken = userReqDto.toAuthentication();
+                Authentication authentication = managerBuilder.getObject().authenticate(authenticationToken);
+                TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
+                tokenDto.setRole("admin");
+                String refreshToken = tokenDto.getRefreshToken();
+                // 토큰 저장
+                Token token = new Token();
+                token.setRefreshToken(refreshToken);
+                token.setMember(user);
+                tokenRepository.save(token);
+                return tokenDto;
+            }
+            else {
+                return null;
+            }
+        }
+        else {
+            return null;
+        }
+    }
+
+    // 관리자 체크
+    public boolean isAdmin (String token) {
+        String email = tokenProvider.getUserEmail(token);
+        Optional<Member> member = userRepository.findByUserEmail(email);
+        if(member.isPresent()) {
+            Member user = member.get();
+            String role = String.valueOf(user.getAuthority());
+            log.info("Authority : {}", user.getAuthority());
+            if (role.equals("ROLE_ADMIN")) {
+                System.out.println("어드민 맞아용");
+                return true;
+            }
+            else return false;
+        }
+        else return false;
     }
 
 
@@ -220,6 +260,49 @@ public class AuthService {
         boolean isTrue = userRepository.existsByUserNickname(nickName);
         log.warn("닉네임 중복 확인 {} : ", isTrue);
         return isTrue;
+    }
+
+    // 닉네임으로 이메일을 찾아서 반환
+    public String getEmail(String nickname) {
+        if (nickname != null) {
+            Optional<Member> member = userRepository.findByUserNickname(nickname);
+            if (member.isPresent()) {
+                Member user = member.get();
+                return user.getUserEmail();
+            }
+            else {
+                return null;
+            }
+        }
+        else {
+            return null;
+        }
+    }
+
+    // 비밀번호 변경
+    public boolean changePassword(UserReqDto userReqDto) {
+        try {
+            Optional<Member> member = userRepository.findByUserNickname(userReqDto.getUserNickname());
+            if (member.isPresent()) {
+                Member user = member.get();
+                user.setUserPassword(passwordEncoder.encode(userReqDto.getUserPassword()));
+                userRepository.save(user);
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // accessToken 재발급을 위해 리프레쉬 토큰에서 권한 정보 추출
+    public String createAccessToken(String refreshToken) {
+        Authentication authentication = tokenProvider.getAuthentication(refreshToken);
+        return tokenProvider.generateAccessToken(authentication);
     }
 
 

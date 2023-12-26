@@ -3,15 +3,12 @@ package com.projectBackend.project.jwt;
 
 
 import com.projectBackend.project.dto.TokenDto;
-import com.projectBackend.project.entity.Token;
-import com.projectBackend.project.repository.TokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,7 +21,6 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -32,12 +28,10 @@ import java.util.stream.Collectors;
 public class TokenProvider {
     private static final String AUTHORITIES_KEY ="auth";
     private static final String BEARER_TYPE = "Bearer"; // 토큰의 타입
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60; //
-    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 10;
+    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 10 * 60; // 임시 1분
+    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60; // 임시 1시간
     private final Key key; // 토큰을 서명(signiture)하기 위한 Key
 
-    @Autowired
-    private TokenRepository tokenRepository;
 
 
     public TokenProvider(@Value("${jwt.secret}") String secretKey) {
@@ -61,8 +55,6 @@ public class TokenProvider {
         String accessToken = io.jsonwebtoken.Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim(AUTHORITIES_KEY, authorities)
-//                    .claim("email", member.getEmail()) // member가 인스턴스 변수인 경우
-//                    .claim("name", member.getName()) // member가 인스턴스 변수인 경우
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
@@ -71,8 +63,6 @@ public class TokenProvider {
         String refreshToken = io.jsonwebtoken.Jwts.builder()
                 .setExpiration(refreshTokenExpiresIn)
                 .setSubject(authentication.getName())
-//                    .claim("email", member.getEmail()) // member가 인스턴스 변수인 경우
-//                    .claim("name", member.getName()) // member가 인스턴스 변수인 경우
                 .claim(AUTHORITIES_KEY, authorities)
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
@@ -88,48 +78,7 @@ public class TokenProvider {
                 .build();
     }
 
-    // 새로운 accessToken
-    public String generateNewAccessToken(String Token) {
-        System.out.println("start creating new access");
-        // refresh 토큰을 파싱하여 클레임을 얻습니다.
-        Claims refreshTokenClaims = parseClaims(Token);
-        // refresh 토큰이 유효한지 확인합니다.
-        if (validateToken(Token) && refreshTokenClaims.get(AUTHORITIES_KEY) != null) {
-            // refresh 토큰 클레임에서 사용자 정보를 추출합니다.
-            // Long id 값
-            String subject = refreshTokenClaims.getSubject();
-            // auth 값
-            String authorities = refreshTokenClaims.get(AUTHORITIES_KEY).toString();
 
-            // 권한을 GrantedAuthority 객체의 리스트로 변환합니다.
-            Collection<? extends GrantedAuthority> grantedAuthorities =
-                    Arrays.stream(authorities.split(","))
-                            .map(SimpleGrantedAuthority::new)
-                            .collect(Collectors.toList());
-
-            // 추출된 정보를 사용하여 UserDetails 객체를 생성합니다.
-            User principal = new User(subject, "", grantedAuthorities);
-
-            // 추출된 정보를 사용하여 새로운 access 토큰을 생성합니다.
-            String newAccessToken = io.jsonwebtoken.Jwts.builder()
-                    .setSubject(subject)
-                    .claim(AUTHORITIES_KEY, authorities)
-//                    .claim("email", member.getEmail()) // member가 인스턴스 변수인 경우
-//                    .claim("name", member.getName()) // member가 인스턴스 변수인 경우
-                    .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRE_TIME))
-                    .signWith(key, SignatureAlgorithm.HS512)
-                    .compact();
-
-            // principal 로깅 (선택 사항)
-            log.warn("principal {} :", principal);
-
-            // 새로운 access 토큰을 반환합니다.
-            return newAccessToken;
-        } else {
-            // 유효하지 않은 refresh 토큰 처리 (필요에 따라 예외를 throw하거나 null을 반환합니다.)
-            throw new RuntimeException("유효하지 않은 refresh 토큰");
-        }
-    }
 
     // 토큰 복호화
     public Claims parseClaims(String accessToken) {
@@ -176,7 +125,7 @@ public class TokenProvider {
         }
         return false;
     }
-
+    
     // refresh 토큰의 유효성 검사
     public boolean validateRefreshToken(String refreshToken) {
         try {
@@ -209,22 +158,23 @@ public class TokenProvider {
     }
 
 
-//    // 저장되어 있는 토큰 가져오기
-//    public String findToken(String email) {
-//        Optional<Token> token = tokenRepository.findByUserEmail(email);
-//        Token tokenData = token.get();
-//        System.out.println("토큰 정보 : " + tokenData);
-//        String refreshToken = tokenData.getRefreshToken();
-//        return refreshToken;
-//    }
-//
-//    // 토큰
-
-
-
     // access 토큰 재발급
     public String generateAccessToken(Authentication authentication) {
-        return generateTokenDto(authentication).getAccessToken();
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
+        long now = (new Date()).getTime(); // 현재 시간
+        // 토큰 만료 시간 설정
+        Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+
+        // 토큰 생성
+        return io.jsonwebtoken.Jwts.builder()
+                .setSubject(authentication.getName())
+                .claim(AUTHORITIES_KEY, authorities)
+                .setExpiration(accessTokenExpiresIn)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
     }
 
     // 길종환 (수정 조영준)

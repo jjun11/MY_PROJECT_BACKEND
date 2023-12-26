@@ -1,12 +1,10 @@
 package com.projectBackend.project.controller;
 
-import com.projectBackend.project.dto.MusicHeartDto;
 import com.projectBackend.project.dto.MusicUserDto;
 import com.projectBackend.project.dto.PerformanceDto;
 import com.projectBackend.project.service.MusicHeartService;
 import com.projectBackend.project.service.MusicService;
 import com.projectBackend.project.service.PerformanceService;
-import com.projectBackend.project.service.PerformerService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -14,8 +12,8 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -53,7 +51,15 @@ public class MainController {
 
     // 음악 좋아요 순서 정렬
     @GetMapping("/likeSong")
-    public ResponseEntity<List<MusicUserDto>> listList() {
+    public ResponseEntity<List<MusicUserDto>> likeList() {
         return ResponseEntity.ok(musicService.getMusicByheart());
     }
+
+    // 회원 성별 좋아요 정렬
+    @GetMapping("/gender")
+    public ResponseEntity<List<MusicUserDto>> genderList(@RequestParam String token) {
+        return ResponseEntity.ok(musicHeartService.getGenderList(token));
+    }
+
+
 }

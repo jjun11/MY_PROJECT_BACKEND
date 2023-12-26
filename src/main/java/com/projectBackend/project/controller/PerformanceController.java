@@ -3,6 +3,7 @@ package com.projectBackend.project.controller;
 
 import com.projectBackend.project.dto.PerformanceDto;
 import com.projectBackend.project.dto.UserResDto;
+import com.projectBackend.project.entity.Member;
 import com.projectBackend.project.service.AuthService;
 import com.projectBackend.project.service.PerformanceService;
 import lombok.RequiredArgsConstructor;
@@ -16,16 +17,16 @@ import java.util.List;
 //import static com.projectBackend.project.utils.Common.CORS_ORIGIN;
 
 
+
 @Slf4j
 @RestController
 @RequestMapping("/performance")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // CrossOrigin 어노테이션을 통해 특정 origin(여기서는 http://localhost:3000)에서의 요청을 허용한다.
 public class PerformanceController {
     private final PerformanceService performanceService;
     private final AuthService authService;
 
-    // 공연 전체 조회
+    // 공연 전체 조회 -
     @GetMapping("/list")
     public ResponseEntity<List<PerformanceDto>> performanceList() {
         System.out.println("컨트롤러 performanceList");
@@ -42,15 +43,23 @@ public class PerformanceController {
     }
 
 
+    // 공연 전체 삭제
+//    @DeleteMapping("/delete")
+//    public ResponseEntity<Boolean> performanceDelete() {
+//        System.out.println("PerformanceController 공연 삭제");
+//        performanceService.deleteAll();
+//        return ResponseEntity.ok(true);
+//    }
+
     // 공연 삭제
-    @DeleteMapping("/delete")
-    public ResponseEntity<Boolean> performanceDelete() {
+    @DeleteMapping("/delete/{performanceId}")
+    public ResponseEntity<Boolean> performanceDelete(@PathVariable Long performanceId) {
         System.out.println("PerformanceController 공연 삭제");
-        performanceService.deleteAll();
+        performanceService.deletePerformance(performanceId);
         return ResponseEntity.ok(true);
     }
 
-    // 페이지네이션
+    // 페이지네이션 -
     @GetMapping("/list/page")
     public ResponseEntity<List<PerformanceDto>> performanceList(@RequestParam(defaultValue = "0") int page,
                                                                 @RequestParam(defaultValue = "10") int size) {
@@ -60,7 +69,7 @@ public class PerformanceController {
         return ResponseEntity.ok(list);
     }
 
-    // 페이지 수 조회
+    // 페이지 수 조회 -
     @GetMapping("/list/count")
     public ResponseEntity<Integer> performancePage(@RequestParam(defaultValue = "0") int page,
                                                    @RequestParam(defaultValue = "10") int size) {
@@ -92,6 +101,14 @@ public class PerformanceController {
 //        List<PerformanceDto> list = performanceService.getPerformanceList();
 //        return ResponseEntity.ok(list);
 //    }
+
+    // 장현준, 전체유저리스트
+    @GetMapping("/userList")
+    public ResponseEntity<List<Member>> userList() {
+        System.out.println("컨트롤러 userList");
+        List<Member> list = authService.getUserList();
+        return ResponseEntity.ok(list);
+    }
 
 }
 

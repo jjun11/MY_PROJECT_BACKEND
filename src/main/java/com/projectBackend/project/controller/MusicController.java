@@ -1,17 +1,18 @@
 package com.projectBackend.project.controller;
 
 
-import com.projectBackend.project.dto.MusicDTO;
-import com.projectBackend.project.dto.MusicUserDto;
-import com.projectBackend.project.dto.UserReqDto;
+import com.projectBackend.project.dto.*;
 import com.projectBackend.project.entity.Member;
 import com.projectBackend.project.entity.Music;
+import com.projectBackend.project.repository.MusicHeartRepository;
 import com.projectBackend.project.service.MusicHeartService;
 import com.projectBackend.project.service.MusicService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 //import static com.projectBackend.project.utils.Common.CORS_ORIGIN;
 
@@ -76,17 +78,14 @@ public class MusicController {
         }
     }
 
-
-    //음악 삭제
+    //음악 삭제 -
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Boolean> musicDelete(@PathVariable Long id) {
         boolean isTrue = musicService.deleteMusic(id);
         return ResponseEntity.ok(isTrue);
     }
 
-
-    //음악 수정
-
+    //음악 수정 -
     @PutMapping("/modify/{id}")
     public  ResponseEntity<Boolean> musicModify(@PathVariable Long id, @RequestBody MusicDTO musicDTO) {
         boolean isTrue = musicService.modifyMusic(id,musicDTO);
@@ -94,14 +93,7 @@ public class MusicController {
 
     }
 
-
-
-
-
-
-
-
-    //음악 등록
+    //음악 등록 -
     @PostMapping("/new")
     public ResponseEntity<MusicUserDto> addMusic(@RequestBody MusicUserDto musicUserDto) {
 
@@ -116,6 +108,17 @@ public class MusicController {
 
         return ResponseEntity.ok(responseDto);
     }
+
+
+    //음악 구매
+    @PostMapping("/purchase")
+    public ResponseEntity<Boolean> purchaseMusic(@RequestBody MusicUserDto musicUserDto) {
+        log.info("musicUserDto : {}",musicUserDto.getToken());
+        return ResponseEntity.ok(musicService.purchaseMusic(musicUserDto));
+    }
+
+
+
 
 
 
@@ -156,3 +159,4 @@ public class MusicController {
         }
     }
 }
+

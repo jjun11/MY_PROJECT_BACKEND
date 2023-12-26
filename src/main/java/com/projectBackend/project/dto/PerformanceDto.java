@@ -14,11 +14,10 @@ public class PerformanceDto {
     private String venue;
     private String detailVenue;
     private String performanceDate;
-    private int price;
+    private Integer price;
     private String description;
     private int seatCount;
     private String performanceImage;
     private List<String> nicknames;
-
 
 }

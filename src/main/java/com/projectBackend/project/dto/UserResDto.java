@@ -30,7 +30,6 @@ public class UserResDto {
     @Enumerated(EnumType.STRING)
     private Authority authority;
 
-
     // 장현준 이메일로 공연조회용
     private List<PerformanceDto> performances;
     //    private List<String> nicknames;

@@ -1,21 +1,27 @@
 package com.projectBackend.project.controller;
 
+import com.projectBackend.project.constant.Authority;
 import com.projectBackend.project.dto.TokenDto;
 import com.projectBackend.project.dto.UserReqDto;
 import com.projectBackend.project.dto.UserResDto;
 import com.projectBackend.project.entity.Member;
+import com.projectBackend.project.entity.Token;
 import com.projectBackend.project.jwt.TokenProvider;
-import com.projectBackend.project.service.AuthService;
 import com.projectBackend.project.service.KakaoService;
+import com.projectBackend.project.service.AuthService;
 import com.projectBackend.project.service.MailService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+
 import org.springframework.web.bind.annotation.*;
 
+
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static com.projectBackend.project.service.MailService.EPW;
@@ -98,6 +104,26 @@ public class AuthController {
         return ResponseEntity.ok(tokenDto);
     }
 
+
+    // 관리자 로그인
+    @PostMapping("/addmin")
+    public ResponseEntity<TokenDto> adminLogin(@RequestBody UserReqDto userReqDto) {
+        return ResponseEntity.ok(authService.admin(userReqDto));
+    }
+
+    // 이메일 찾기 -> 닉네임으로
+    @GetMapping("/find")
+    public ResponseEntity<String> findEmail(@RequestParam String nickname) {
+
+        return ResponseEntity.ok(authService.getEmail(nickname));
+    }
+
+    // 비밀 번호 변경
+    @PostMapping("/change/password")
+    public ResponseEntity<Boolean> changePassword(@RequestBody UserReqDto userReqDto ) {
+        return ResponseEntity.ok(authService.changePassword(userReqDto));
+    }
+
     // 로그인 상태 체크 (+ refresh 토큰 유효성 체크)
     @GetMapping("/isLogin/{email}")
     public ResponseEntity<Boolean> isLogin(@PathVariable String email) {
@@ -105,15 +131,18 @@ public class AuthController {
         return ResponseEntity.ok(isTrue);
     }
 
+
     // accessToken 재발급
     @PostMapping("/refresh")
     public ResponseEntity<String> refreshToken(@RequestBody String refreshToken) {
-        System.out.println("새로운 토큰 발급");
         log.info("refreshToken: {}", refreshToken);
         return ResponseEntity.ok(authService.createAccessToken(refreshToken));
     }
 
-
+    @GetMapping("/userList")
+    public ResponseEntity<List<Member>> userList() {
+        return ResponseEntity.ok(authService.getUserList());
+    }
 
     // 길종환
     @GetMapping("/infoByToken")
@@ -126,13 +155,5 @@ public class AuthController {
         return authService.getUserByEmail(email);
     }
 
-    // 장현준, 전체유저리스트
-    @GetMapping("/userList")
-    public ResponseEntity<List<Member>> userList() {
-        System.out.println("컨트롤러 userList");
-        List<Member> list = authService.getUserList();
-        return ResponseEntity.ok(list);
-    }
 
 }
-

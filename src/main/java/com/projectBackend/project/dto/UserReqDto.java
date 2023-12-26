@@ -18,14 +18,18 @@ import javax.persistence.Enumerated;
 @Builder
 public class UserReqDto {
     private String userEmail;
-    private String userPassword;
+        private String userPassword;
     private String userNickname;
     private String userName;
     private String userAddr;
+    private String userDetailAddr;
+
     private String userPhone;
     private String userGen;
     private int userAge;
     private int userPoint;
+
+    private String profileImg;
     private String BUSINESS_NUM;
     @Enumerated(EnumType.STRING)
     private Authority authority;
@@ -44,6 +48,7 @@ public class UserReqDto {
                 .age(userAge)
                 .gender(userGen)
                 .point(userPoint)
+                .profileImg(profileImg)
                 .BUSINESS_NUM(BUSINESS_NUM)
                 .authority(Authority.ROLE_USER)
                 .build();
