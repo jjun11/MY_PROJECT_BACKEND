@@ -54,3 +54,4 @@ public class TicketerController {
         return authService.getUserByEmail(email);
     }
 }
+
