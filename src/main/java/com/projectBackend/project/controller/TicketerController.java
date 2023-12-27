@@ -53,5 +53,6 @@ public class TicketerController {
         String email = tokenProvider.getUserEmail(token);
         return authService.getUserByEmail(email);
     }
+
 }
 
